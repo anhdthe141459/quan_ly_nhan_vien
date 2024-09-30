@@ -1,0 +1,27 @@
+{
+  "name": "quan_ly_nhan_vien_be",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anhdthe141459/quan_ly_nhan_vien_BE.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/anhdthe141459/quan_ly_nhan_vien_BE/issues"
+  },
+  "homepage": "https://github.com/anhdthe141459/quan_ly_nhan_vien_BE#readme",
+  "dependencies": {
+    "express": "^4.21.0",
+    "mongoose": "^8.7.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}
