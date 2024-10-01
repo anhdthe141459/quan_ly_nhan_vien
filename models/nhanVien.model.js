@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-// Định nghĩa schema cho User
 const nhanVienSchema = new mongoose.Schema({
   ma_so_nhan_su: {
     type: String,
@@ -41,6 +40,10 @@ const nhanVienSchema = new mongoose.Schema({
   },
   trinh_do_van_hoa: {
     type: String,
+  },
+  ma_phong_ban:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:'phong_ban'
   },
   createdAt: {
     type: Date,
