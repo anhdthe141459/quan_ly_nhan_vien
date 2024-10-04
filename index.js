@@ -2,10 +2,17 @@ const express = require('express');
 const mongoose = require('mongoose');
 const config = require('./config/config')
 const app = express();
-const port = 3000;
+const cors = require('cors');
+
+const port = 3001;
 const routes = require('./routes');  // Import module route chính
 
+app.use(cors()); 
+// Middleware để parse JSON body
+app.use(express.json());
 
+// Middleware để parse URL-encoded data (form submissions)
+app.use(express.urlencoded({ extended: true }));
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });

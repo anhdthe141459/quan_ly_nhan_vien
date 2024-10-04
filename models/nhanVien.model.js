@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
 const nhanVienSchema = new mongoose.Schema({
-  ma_so_nhan_su: {
-    type: String,
-    required: true,
-  },
+  // ma_so_nhan_su: {
+  //   type: String,
+  //   required: true,
+  // },
   ten_nhan_su: {
     type: String,
     required: true,
@@ -29,11 +29,10 @@ const nhanVienSchema = new mongoose.Schema({
     type: String,
   },
   so_dien_thoai: {
-    type: Number,
+    type: String,
   },
   dan_toc: {
     type: String,
-    required: true,
   },
   ton_giao: {
     type: String,
