@@ -1,26 +1,27 @@
 const nhanVienService = require('../services/nhanVien.service');
+const phongBanservice =require('../services/phongBan.service');
 
-  const getNhanViens = async (req, res) => {
+  const getPhongBans = async (req, res) => {
     try {
-      const nhanViens = await nhanVienService.getNhanViens();
-      res.json(nhanViens);
+      const phongBans = await phongBanservice.getPhongBans();
+      res.json(phongBans);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
   };
-  const createOrUpdateNhanVien = async (req, res) => {
+  const createOrUpdatePhongBan = async (req, res) => {
     try {
-      const {nhanVien,chucVuCoQuan,nhanVienCccd}=req.body;
-      await nhanVienService.createOrUpdateNhanVien(nhanVien,chucVuCoQuan,nhanVienCccd);
+      const {phongBan}=req.body;
+      await phongBanservice.createOrUpdatePhongBan(phongBan);
       res.json('oke');
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
   };
-  const removeNhanVien = async (req, res) => {
+  const removePhongBan = async (req, res) => {
     try {
       const {id}=req.params;
-      await nhanVienService.removeNhanVien(id);
+      await phongBanservice.removePhongBan(id);
       res.json("delete successfull");
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -59,11 +60,30 @@ const nhanVienService = require('../services/nhanVien.service');
       res.status(500).json({ message: error.message });
     }
   }
-  
+  const getAllNhanVienNotPhongBan = async (req, res) => {
+    try {
+      const {maPhongBan}=req.params;
+      const nhanVienNotTruongPhong = await phongBanservice.getAllNhanVienNotPhongBan(maPhongBan);
+      res.json(nhanVienNotTruongPhong);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
+
+  const getAllTenPhongBan = async (req, res) => {
+    try {
+      const tenPhongBans = await phongBanservice.getAllTenPhongBan();
+      res.json(tenPhongBans);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
 
 module.exports = {
-    getNhanViens,
-    createOrUpdateNhanVien,
-    removeNhanVien,
+    getPhongBans,
+    createOrUpdatePhongBan,
+    removePhongBan,
     searchNhanVien,
+    getAllNhanVienNotPhongBan,
+    getAllTenPhongBan
 };

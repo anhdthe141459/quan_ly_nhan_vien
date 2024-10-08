@@ -5,9 +5,9 @@ const phongBanSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  so_luong_nhan_vien: {
-    type: Number,
-  },
+  // so_luong_nhan_vien: {
+  //   type: Number,
+  // },
   ngay_thanh_lap: {
     type: Date,
   },
@@ -21,7 +21,6 @@ const phongBanSchema = new mongoose.Schema({
   } 
 });
 
-// Tạo model từ schema
 const PhongBanModel = mongoose.model('phong_ban', phongBanSchema);
 
 module.exports = PhongBanModel;

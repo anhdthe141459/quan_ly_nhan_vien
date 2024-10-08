@@ -28,6 +28,10 @@ const nhanVienSchema = new mongoose.Schema({
   dia_chi_hien_tai: {
     type: String,
   },
+  quoc_tich: {
+    type: String,
+    required:true
+  },
   so_dien_thoai: {
     type: String,
   },
@@ -38,6 +42,9 @@ const nhanVienSchema = new mongoose.Schema({
     type: String,
   },
   trinh_do_van_hoa: {
+    type: String,
+  },
+  tinh_trang_hon_nhan: {
     type: String,
   },
   ma_phong_ban:{

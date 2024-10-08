@@ -1,14 +1,18 @@
 const mongoose = require('mongoose');
 
 const nhanVienCCCDSchema = new mongoose.Schema({
+  nhan_vien_id:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:'nhan_vien'
+  },
   so_cccd: {
     type: String,
     required: true,
   },
-  ngay_cap: {
+  ngay_cap_cccd: {
     type: Date,
   },
-  noi_cap: {
+  noi_cap_cccd: {
     type: String
   },
   createdAt: {

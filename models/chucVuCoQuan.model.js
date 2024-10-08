@@ -1,14 +1,18 @@
 const mongoose = require('mongoose');
 
 const chucVuCoQuanSchema = new mongoose.Schema({
-  ma_nhan_su:{
+  nhan_vien_id:{
     type:mongoose.Schema.Types.ObjectId,
     ref:'nhan_vien'
   },
   ma_phong_ban:{
     type:mongoose.Schema.Types.ObjectId,
     ref:'phong_ban'
-  },  
+  }, 
+  ma_nhan_su: {
+    type: String,
+    required: true,
+  }, 
   chuc_vu: {
     type: String,
     required: true,
