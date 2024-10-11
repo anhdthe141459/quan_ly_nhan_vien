@@ -23,6 +23,7 @@ const chucVuCoQuanSchema = new mongoose.Schema({
   email:{
     type:String,
   },
+  da_nghi_viec: { type: Boolean, default: false },
   createdAt: {
     type: Date,
     default: Date.now

@@ -17,10 +17,10 @@ const nhanVienService = require('../services/nhanVien.service');
       res.status(500).json({ message: error.message });
     }
   };
-  const removeNhanVien = async (req, res) => {
+  const choNhanVienNghiViec = async (req, res) => {
     try {
       const {id}=req.params;
-      await nhanVienService.removeNhanVien(id);
+      await nhanVienService.choNhanVienNghiViec(id);
       res.json("delete successfull");
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -59,11 +59,19 @@ const nhanVienService = require('../services/nhanVien.service');
       res.status(500).json({ message: error.message });
     }
   }
-  
+  const getAllTenNhanVienChuaCoBangLuong = async (req, res) => {
+    try {
+      const nhanViens = await nhanVienService.getAllTenNhanVienChuaCoBangLuong();
+      res.json(nhanViens);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
 
 module.exports = {
     getNhanViens,
     createOrUpdateNhanVien,
-    removeNhanVien,
+    choNhanVienNghiViec,
     searchNhanVien,
+    getAllTenNhanVienChuaCoBangLuong
 };

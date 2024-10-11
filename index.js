@@ -3,9 +3,11 @@ const mongoose = require('mongoose');
 const config = require('./config/config')
 const app = express();
 const cors = require('cors');
+const cron = require('node-cron');
 
 const port = 3001;
-const routes = require('./routes');  // Import module route chính
+const routes = require('./routes');
+const chamCongService = require('./services/chamCong.service')
 
 app.use(cors()); 
 // Middleware để parse JSON body
@@ -32,5 +34,18 @@ mongoose.connect(config.connectionString)
   .catch((error) => {
     console.error('MongoDB connection error:', error);
   });
+
+// Lập lịch add chấm công vào mỗi ngày lúc 0:00 giờ sáng
+
+  cron.schedule('54 10 * * 1-5', async () => {
+    const today = new Date();
+    const day = today.getDay();
+
+    if (day !== 6 && day !== 0) {
+        await chamCongService.createChamCongs();
+    }
+}, {
+    timezone: "Asia/Ho_Chi_Minh" // Đảm bảo công việc chạy theo múi giờ của bạn
+});
 
 app.use('/', routes); 

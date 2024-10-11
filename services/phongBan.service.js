@@ -1,7 +1,7 @@
 const NhanVienModel = require('../models/nhanVien.model');
 const ChucVuCoQuanModel = require('../models/chucVuCoQuan.model');
 const NhanVienCCCDModel = require('../models/nhanVienCCCD.model');
-const PhongBanModel =require('../models/phongBan.model')
+const PhongBanModel =require('../models/phongBan.model');
 
 const getPhongBans = async() =>{
 
@@ -10,7 +10,7 @@ const getPhongBans = async() =>{
     const result = await Promise.all(phongBans.map(async (phongBan) => {
       const nhanVien = await NhanVienModel.findById(phongBan.ma_truong_phong).select('ten_nhan_su');
       const nhanVienChucVu = await ChucVuCoQuanModel.findOne({ nhan_vien_id: nhanVien?._id }).select('ma_nhan_su');
-      const soLuongNhanVien = await ChucVuCoQuanModel.countDocuments({ma_phong_ban:phongBan?._id});
+      const soLuongNhanVien = await ChucVuCoQuanModel.countDocuments({ma_phong_ban:phongBan?._id,da_nghi_viec:false});
       return {
         ...phongBan._doc,
         so_luong_nhan_vien:soLuongNhanVien,
@@ -42,14 +42,12 @@ const createOrUpdatePhongBan = async(phongBan) =>{
         }
         if(phongBan.ma_truong_phong==null){
           nhanVienChucVu = await ChucVuCoQuanModel.findOne({ nhan_vien_id: phongBanUpdate?.ma_truong_phong });
-          console.log("nhanVienChucVu1111=========",nhanVienChucVu)
           if(nhanVienChucVu){
             nhanVienChucVu.ma_phong_ban=null;
             nhanVienChucVu.save();
           }
         }else{
           nhanVienChucVu = await ChucVuCoQuanModel.findOne({ nhan_vien_id: phongBan?.ma_truong_phong });
-          console.log("nhanVienChucVu3333=========",nhanVienChucVu)
           nhanVienChucVu.ma_phong_ban=phongBan?._id;
           nhanVienChucVu.save();
         }
@@ -71,7 +69,7 @@ const searchNhanVien = async(query) =>{
 const getAllNhanVienNotPhongBan = async (maPhongBan) =>{
     const chucVuCoQuans = await ChucVuCoQuanModel.find().select('nhan_vien_id ma_phong_ban ma_nhan_su');
     const nhanVienNotPhongBans = chucVuCoQuans 
-    .filter(item => item.ma_phong_ban== null || item.ma_phong_ban==maPhongBan); 
+    .filter(item => item.da_nghi_viec==false && (item.ma_phong_ban== null || item.ma_phong_ban==maPhongBan)); 
     const result = await Promise.all(nhanVienNotPhongBans?.map(async (nhanVien) => {
       const nhanViens = await NhanVienModel.findById(nhanVien?.nhan_vien_id).select('ten_nhan_su');
       return {
@@ -83,6 +81,33 @@ const getAllNhanVienNotPhongBan = async (maPhongBan) =>{
     return result;
 }
 
+const getAllNhanVienPhongBan = async (maPhongBan) =>{
+  if(maPhongBan=='all'){
+    const chucVuCoQuans = await ChucVuCoQuanModel.find({da_nghi_viec : false}).populate('nhan_vien_id');
+    const nhanViens=chucVuCoQuans.map( (chucVuCoQuan) =>{
+      return {
+        nhan_vien_id:chucVuCoQuan.nhan_vien_id._id,
+        ma_nhan_su:chucVuCoQuan.ma_nhan_su,
+        ten_nhan_su:chucVuCoQuan.nhan_vien_id.ten_nhan_su
+      }
+    });
+    return nhanViens
+  }else{
+    const chucVuCoQuans = await ChucVuCoQuanModel.find({da_nghi_viec : false}).select('nhan_vien_id ma_phong_ban ma_nhan_su -_id');
+    const nhanVienPhongBans= chucVuCoQuans 
+    .filter(item => item.ma_phong_ban==maPhongBan);
+    const result = await Promise.all(nhanVienPhongBans?.map(async (nhanVien) => {
+      const nhanViens = await NhanVienModel.findById(nhanVien?.nhan_vien_id).select('ten_nhan_su');
+      return {
+        ...nhanVien?._doc,
+        ten_nhan_su:nhanViens?.ten_nhan_su,
+      };
+    }));
+    return result;
+  }
+  
+}
+
 
 module.exports = {
     getPhongBans,
@@ -90,5 +115,6 @@ module.exports = {
     removePhongBan,
     searchNhanVien,
     getAllNhanVienNotPhongBan,
-    getAllTenPhongBan
+    getAllTenPhongBan,
+    getAllNhanVienPhongBan
 };

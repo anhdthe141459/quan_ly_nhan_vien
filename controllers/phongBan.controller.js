@@ -13,7 +13,7 @@ const phongBanservice =require('../services/phongBan.service');
     try {
       const {phongBan}=req.body;
       await phongBanservice.createOrUpdatePhongBan(phongBan);
-      res.json('oke');
+      res.json('success');
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
@@ -78,6 +78,15 @@ const phongBanservice =require('../services/phongBan.service');
       res.status(500).json({ message: error.message });
     }
   };
+  const getAllNhanVienPhongBan = async (req, res) => {
+    try {
+      const {maPhongBan}=req.params;
+      const nhanVienPhongBans = await phongBanservice.getAllNhanVienPhongBan(maPhongBan);
+      res.json(nhanVienPhongBans);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
 
 module.exports = {
     getPhongBans,
@@ -85,5 +94,6 @@ module.exports = {
     removePhongBan,
     searchNhanVien,
     getAllNhanVienNotPhongBan,
-    getAllTenPhongBan
+    getAllTenPhongBan,
+    getAllNhanVienPhongBan
 };

@@ -1,24 +1,30 @@
 const mongoose = require('mongoose');
 
 const bangLuongSchema = new mongoose.Schema({
-  ma_nhan_su:{
+  nhan_vien_id:{
     type:mongoose.Schema.Types.ObjectId,
     ref:'nhan_vien'
   },
-  thang_luong: {
-    type: Number,
-  },
-  nam_luong: {
-    type: Number
-  },
+  // thang_luong: {
+  //   type: Number,
+  // },
+  // nam_luong: {
+  //   type: Number
+  // },
   tien_luong: {
     type: Number,
   },
-  tien_luong_thuc_nhan: {
+  // tien_luong_thuc_nhan: {
+  //   type: Number,
+  // },
+  khau_tru: {
+    type: Number,
+  },
+  phu_cap: {
     type: Number,
   },
   ngay_tra_luong: {
-    type: Date,
+    type: Number,
   },
   createdAt: {
     type: Date,

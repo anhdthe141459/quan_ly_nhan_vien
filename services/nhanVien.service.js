@@ -2,45 +2,44 @@ const NhanVienModel = require('../models/nhanVien.model');
 const ChucVuCoQuanModel = require('../models/chucVuCoQuan.model');
 const NhanVienCCCDModel = require('../models/nhanVienCCCD.model');
 const PhongBanModel = require('../models/phongBan.model');
+const BangLuongModel = require('../models/bangLuong.model');
 const { getAllNhanVienNotPhongBan } = require('./phongBan.service');
 
 const getNhanViens = async() =>{
 
-    const nhanViens = await NhanVienModel.find();
     
-    const result = await Promise.all(nhanViens.map(async (nhanVien) => {
-      const nhanVienChucVu = await ChucVuCoQuanModel.findOne({ nhan_vien_id: nhanVien._id });
-      const nhanVienCCCD = await NhanVienCCCDModel.findOne({ nhan_vien_id: nhanVien._id });
-      const phongBan = await PhongBanModel.findById(nhanVienChucVu?.ma_phong_ban).select('ten_phong_ban');
+    const nhanVienChucVus = await ChucVuCoQuanModel.find({da_nghi_viec:false });
+      const result = await Promise.all(nhanVienChucVus.map(async (nhanVien) => {
+      const nhanViens = await NhanVienModel.findById(nhanVien.nhan_vien_id);
+      const nhanVienCCCD = await NhanVienCCCDModel.findOne({ nhan_vien_id: nhanVien.nhan_vien_id });
+      const phongBan = await PhongBanModel.findById(nhanVien?.ma_phong_ban).select('ten_phong_ban');
 
       return {
         ...nhanVien._doc,
-        nhanVienChucVu,      
+        nhanViens,      
         nhanVienCCCD,
         phongBan      
       };
     }));
 
-    // const nhanVienChucVus= await ChucVuCoQuanModel.find().populate('nhan_vien_id');
-    
     const data = result.map(nhanVien => {
         const nhanSu={
-            _id:nhanVien._id,
-            ten_nhan_su:nhanVien.ten_nhan_su,
-            gioi_tinh:nhanVien.gioi_tinh,
-            nam_sinh:nhanVien.nam_sinh,
-            noi_sinh:nhanVien.noi_sinh,
-            nguyen_quan:nhanVien.nguyen_quan,
-            dia_chi_hien_tai:nhanVien.dia_chi_hien_tai,
-            so_dien_thoai:nhanVien.so_dien_thoai,
-            dan_toc:nhanVien.dan_toc,
-            ton_giao:nhanVien.ton_giao,
-            trinh_do_van_hoa:nhanVien.trinh_do_van_hoa,
-            quoc_tich:nhanVien.quoc_tich,
-            tinh_trang_hon_nhan:nhanVien.tinh_trang_hon_nhan,
-            ma_nhan_su: nhanVien.nhanVienChucVu.ma_nhan_su, 
-            chuc_vu: nhanVien.nhanVienChucVu.chuc_vu, 
-            thoi_gian_cong_hien: nhanVien.nhanVienChucVu.thoi_gian_cong_hien,
+            _id:nhanVien.nhan_vien_id,
+            ten_nhan_su:nhanVien.nhanViens.ten_nhan_su,
+            gioi_tinh:nhanVien.nhanViens.gioi_tinh,
+            nam_sinh:nhanVien.nhanViens.nam_sinh,
+            noi_sinh:nhanVien.nhanViens.noi_sinh,
+            nguyen_quan:nhanVien.nhanViens.nguyen_quan,
+            dia_chi_hien_tai:nhanVien.nhanViens.dia_chi_hien_tai,
+            so_dien_thoai:nhanVien.nhanViens.so_dien_thoai,
+            dan_toc:nhanVien.nhanViens.dan_toc,
+            ton_giao:nhanVien.nhanViens.ton_giao,
+            trinh_do_van_hoa:nhanVien.nhanViens.trinh_do_van_hoa,
+            quoc_tich:nhanVien.nhanViens.quoc_tich,
+            tinh_trang_hon_nhan:nhanVien.nhanViens.tinh_trang_hon_nhan,
+            ma_nhan_su: nhanVien.ma_nhan_su, 
+            chuc_vu: nhanVien.chuc_vu, 
+            thoi_gian_cong_hien: nhanVien.thoi_gian_cong_hien,
             so_cccd:nhanVien.nhanVienCCCD.so_cccd,
             ngay_cap_cccd:nhanVien.nhanVienCCCD.ngay_cap_cccd,
             noi_cap_cccd:nhanVien.nhanVienCCCD.noi_cap_cccd,
@@ -90,11 +89,35 @@ const removeNhanVien = async(id) =>{
     await NhanVienCCCDModel.findOneAndDelete({nhan_vien_id:id});
 }
 
+const choNhanVienNghiViec = async(id) =>{
+    const updatedDoc = await ChucVuCoQuanModel.findOneAndUpdate(
+        { nhan_vien_id: id},
+        { $set: { da_nghi_viec: true } },
+        { new: true }
+    );
+}
+
 const searchNhanVien = async(query) =>{
     const nhanViens= await NhanVienModel.find(query);
     return nhanViens;
 }
 
+const getAllTenNhanVienChuaCoBangLuong = async() =>{
+    const bangLuongs=await BangLuongModel.find();
+
+    const nhanVienChuaCoBangLuongs = await ChucVuCoQuanModel.find({
+        da_nghi_viec:false,
+        nhan_vien_id: { $nin: bangLuongs?.map(bl => bl.nhan_vien_id) } // Lấy mảng nhan_vien_id từ bangLuongs
+      }).populate('nhan_vien_id'); 
+    const result = nhanVienChuaCoBangLuongs?.map( (nhanVien) =>{
+        return {
+          nhan_vien_id:nhanVien.nhan_vien_id._id,
+          ma_nhan_su:nhanVien.ma_nhan_su,
+          ten_nhan_su:nhanVien.nhan_vien_id.ten_nhan_su
+        }
+      }); 
+    return result;
+}
 
 
 
@@ -103,5 +126,7 @@ module.exports = {
     getNhanViens,
     createOrUpdateNhanVien,
     removeNhanVien,
+    choNhanVienNghiViec,
     searchNhanVien,
+    getAllTenNhanVienChuaCoBangLuong
 };
