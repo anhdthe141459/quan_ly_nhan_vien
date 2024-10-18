@@ -5,12 +5,6 @@ const bangLuongSchema = new mongoose.Schema({
     type:mongoose.Schema.Types.ObjectId,
     ref:'nhan_vien'
   },
-  // thang_luong: {
-  //   type: Number,
-  // },
-  // nam_luong: {
-  //   type: Number
-  // },
   tien_luong: {
     type: Number,
   },

@@ -20,7 +20,39 @@ const getChamCongMoiNgay = async (req, res) => {
   }
 }
 
+const getChamCongNhanVienTheoThang = async (req, res) => {
+  try {
+    const { year, month } = req.query;
+    const chamCongs= await chamCongService.getChamCongNhanVienTheoThang(year,month);
+    res.json(chamCongs);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+const getTrangThaiCuaNhanVienMoiThang = async (req, res) => {
+  try {
+    const { year, month, id } = req.query;
+    const chamCongs= await chamCongService.getTrangThaiCuaNhanVienMoiThang(year,month,id);
+    res.json(chamCongs);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getChamCongNhanVienChiTietTheoThang = async (req, res) => {
+  try {
+    const { year, month, id } = req.query;
+    const chamCongs= await chamCongService.getChamCongNhanVienChiTietTheoThang(year,month,id);
+    res.json(chamCongs);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
     createChamCongs,
-    getChamCongMoiNgay
+    getChamCongMoiNgay,
+    getChamCongNhanVienTheoThang,
+    getChamCongNhanVienChiTietTheoThang,
+    getTrangThaiCuaNhanVienMoiThang
 };

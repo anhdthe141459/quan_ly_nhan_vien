@@ -7,6 +7,7 @@ router.post('/crateOrUpdate', nhanVienController.createOrUpdateNhanVien);
 router.delete('/delete/:id', nhanVienController.choNhanVienNghiViec);
 router.get('/search', nhanVienController.searchNhanVien);
 router.get('/getAllTenNhanVienChuaCoBangLuong', nhanVienController.getAllTenNhanVienChuaCoBangLuong);
+router.get('/countNhanVien', nhanVienController.countNhanVien);
 router.post('/crateChamCongs', nhanVienController.createOrUpdateNhanVien);
 
 module.exports = router;

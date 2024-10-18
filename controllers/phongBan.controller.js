@@ -88,6 +88,32 @@ const phongBanservice =require('../services/phongBan.service');
     }
   };
 
+  const searchPhongBan = async (req, res) => {
+    try {
+      const { query } = req;
+
+      const searchQuery = {};
+
+      if (query.ten_phong_ban !== 'undefined') {
+        searchQuery['ten_phong_ban'] = { $regex: query.ten_phong_ban, $options: 'i' };
+      }
+
+      const phongBans= await phongBanservice.searchPhongBan(searchQuery);
+      res.json(phongBans);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+
+  const countPhongBan = async (req, res) => {
+    try {
+      const count = await phongBanservice.countPhongBan();
+      res.json(count);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
+
 module.exports = {
     getPhongBans,
     createOrUpdatePhongBan,
@@ -95,5 +121,7 @@ module.exports = {
     searchNhanVien,
     getAllNhanVienNotPhongBan,
     getAllTenPhongBan,
-    getAllNhanVienPhongBan
+    getAllNhanVienPhongBan,
+    searchPhongBan,
+    countPhongBan
 };

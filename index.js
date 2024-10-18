@@ -37,7 +37,7 @@ mongoose.connect(config.connectionString)
 
 // Lập lịch add chấm công vào mỗi ngày lúc 0:00 giờ sáng
 
-  cron.schedule('54 10 * * 1-5', async () => {
+  cron.schedule('02 9 * * 1-5', async () => {
     const today = new Date();
     const day = today.getDay();
 
