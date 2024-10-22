@@ -93,7 +93,7 @@ async function getTongGioLamViecCuaNhanVienMoiThang(year, month, nhan_vien_id) {
         // Nhóm các kết quả lại để tính tổng theo mã nhân viên
         $group: {
           _id: null,
-          tongSoGioLamViec: { $sum: '$so_gio_lam_viec' },
+          tongSoGioLamViecChinhThuc: { $sum: '$so_gio_lam_viec' },
           tongSoGioLamThem: { $sum: '$so_gio_lam_them' },
         },
       },
@@ -101,7 +101,7 @@ async function getTongGioLamViecCuaNhanVienMoiThang(year, month, nhan_vien_id) {
         // Định dạng lại kết quả đầu ra
         $project: {
           _id: 0,
-          tongSoGioLamViec: 1,
+          tongSoGioLamViecChinhThuc: 1,
           tongSoGioLamThem: 1,
         },
       },
@@ -124,7 +124,6 @@ async function getTongGioLamViecCuaNhanVienMoiThang(year, month, nhan_vien_id) {
         },
       },
       {
-        // Nhóm các kết quả lại để tính tổng theo mã nhân viên
         $group: {
           _id: '$trang_thai',
           count: { $sum: 1 },
@@ -157,10 +156,15 @@ const getChamCongNhanVienTheoThang = async(year, month) =>{
     const result = await Promise.all(nhanVienChucVu.map(async (nhanVien) => {
       const tenNhanVien = await NhanVienModel.findById(nhanVien.nhan_vien_id).select('ten_nhan_su');
       const chamCong = await getTongGioLamViecCuaNhanVienMoiThang(year, month,nhanVien.nhan_vien_id);
+      const trangThaiChamCong= await getTrangThaiCuaNhanVienMoiThang(year, month,nhanVien.nhan_vien_id);
       return {
-        ...chamCong["0"]??{tongSoGioLamViec:0, tongSoGioLamThem: 0},
         ...nhanVien._doc,
         ten_nhan_su:tenNhanVien.ten_nhan_su,
+        trang_thai_co_mat:trangThaiChamCong?.co_mat,
+        trang_thai_nghi_co_phep:trangThaiChamCong?.nghi_co_phep,
+        trang_thai_nghi_khong_phep:trangThaiChamCong?.nghi_khong_phep,
+        ...chamCong["0"]??{tongSoGioLamViecChinhThuc:0, tongSoGioLamThem: 0},
+        tong_so_gio_lam:chamCong["0"] ? chamCong["0"].tongSoGioLamViecChinhThuc + chamCong["0"].tongSoGioLamThem:0
       };
     }));
 

@@ -1,4 +1,5 @@
 const nhanVienService = require('../services/nhanVien.service');
+const excelService = require('../services/excel.service');
 
   const getNhanViens = async (req, res) => {
     try {
@@ -73,7 +74,7 @@ const nhanVienService = require('../services/nhanVien.service');
       }
 
       if (query.phong_ban_id !== 'undefined') {
-        searchQuery['phongBanDetail._id'] = { $regex: query.phong_ban_id, $options: 'i' };
+        searchQuery['phongBanDetailIdString'] = { $regex: query.phong_ban_id, $options: 'i' };
       }
 
 
@@ -100,11 +101,36 @@ const nhanVienService = require('../services/nhanVien.service');
     }
   };
 
+  const downloadExcelNhanVien = async (req, res) => {
+    try {
+      const nhanViens = await nhanVienService.getNhanViens();
+      const data =[
+        ['Mã nhân sự','Tên nhân sự','Giới tính','Ngày sinh','Nơi sinh','Nguyên quán','Địa chỉ hiện tại','Số điện thoại',
+          'Dân tộc','Tôn giáo','Tình trạng hôn nhân','Trình độ văn hóa','Quốc tịch','Chức vụ','Số năm cống hiến','Số CCCD','Ngày cấp CCCD','Nơi cấp CCCD','Phòng ban',],
+        ...nhanViens.map(({_id,...item}) =>{
+          return Object.values({
+            ...item,
+            nam_sinh:new Date(item.nam_sinh ).toLocaleDateString(),
+            ngay_cap_cccd:new Date(item.ngay_cap_cccd ).toLocaleDateString()
+          })
+        }),
+      ]
+      const excelBuffer = await excelService.downloadExcel(data);
+      res.setHeader('Content-Disposition', 'attachment; filename="data.xlsx"');
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      // Send the buffer as the response
+      res.send(excelBuffer);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
+
 module.exports = {
     getNhanViens,
     createOrUpdateNhanVien,
     choNhanVienNghiViec,
     searchNhanVien,
     getAllTenNhanVienChuaCoBangLuong,
-    countNhanVien
+    countNhanVien,
+    downloadExcelNhanVien
 };

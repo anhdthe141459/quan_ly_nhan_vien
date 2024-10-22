@@ -4,12 +4,20 @@ const config = require('./config/config')
 const app = express();
 const cors = require('cors');
 const cron = require('node-cron');
-
+const dotenv = require("dotenv");
+const cookieParser = require('cookie-parser');
 const port = 3001;
 const routes = require('./routes');
 const chamCongService = require('./services/chamCong.service')
+const xlsx = require('xlsx');
 
-app.use(cors()); 
+dotenv.config();
+
+app.use(cors({
+  origin: 'http://localhost:3000', // Thay thế bằng nguồn gốc chính xác của ứng dụng
+  credentials: true // Cho phép gửi kèm thông tin xác thực
+}));
+app.use(cookieParser());
 // Middleware để parse JSON body
 app.use(express.json());
 
@@ -37,11 +45,11 @@ mongoose.connect(config.connectionString)
 
 // Lập lịch add chấm công vào mỗi ngày lúc 0:00 giờ sáng
 
-  cron.schedule('02 9 * * 1-5', async () => {
+  cron.schedule('46 9 * * 1-6', async () => {
     const today = new Date();
     const day = today.getDay();
 
-    if (day !== 6 && day !== 0) {
+    if (day !== 0) {
         await chamCongService.createChamCongs();
     }
 }, {

@@ -12,9 +12,9 @@ const getBangLuongChoNhanViens = async() =>{
       const nhanVienChucVu = await ChucVuCoQuanModel.findOne({ nhan_vien_id: bangLuong.nhan_vien_id ,da_nghi_viec:false}).select('ma_nhan_su');
       if(nhanVienChucVu){
         return {
-            ...bangLuong._doc,
             ten_nhan_su:nhanVien?.ten_nhan_su,
             ma_nhan_su:nhanVienChucVu?.ma_nhan_su,
+            ...bangLuong._doc,
           };
       }else{
         return null;
@@ -48,7 +48,7 @@ const getLuongNhanVienTheoThang = async(year, month) =>{
         let tongSoLuongThucNhanNhanVien=0;
         let tongSoCongNhanVien=0;
         if(tongSoGioLamViecNhanVien[0]!=undefined){
-            tongSoCongNhanVien = tongSoGioLamViecNhanVien[0]?.tongSoGioLamViec+tongSoGioLamViecNhanVien[0]?.tongSoGioLamThem;
+            tongSoCongNhanVien = tongSoGioLamViecNhanVien[0]?.tongSoGioLamViecChinhThuc+tongSoGioLamViecNhanVien[0]?.tongSoGioLamThem;
             const soLuongTheoGioNhanVien = bangLuong.tien_luong/40;
             tongSoLuongThucNhanNhanVien = (soLuongTheoGioNhanVien.toFixed(2) * tongSoCongNhanVien) + bangLuong.phu_cap - bangLuong.khau_tru;
         }
@@ -70,7 +70,6 @@ const getLuongNhanVienTheoThang = async(year, month) =>{
 }
 
 const searchBangLuong = async(query) =>{
-    console.log(query)
     const bangLuongs=await BangLuongModel.aggregate([
         {
           $lookup: {

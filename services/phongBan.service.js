@@ -59,6 +59,7 @@ const createOrUpdatePhongBan = async(phongBan) =>{
 }
 const removePhongBan = async(id) =>{
     await PhongBanModel.findByIdAndDelete(id);
+    await ChucVuCoQuanModel.updateOne({ma_phong_ban:id},{ ma_phong_ban: null })
 }
 
 const searchNhanVien = async(query) =>{
@@ -70,7 +71,6 @@ const getAllNhanVienNotPhongBan = async (maPhongBan) =>{
     const chucVuCoQuans = await ChucVuCoQuanModel.find({da_nghi_viec:false}).select('nhan_vien_id ma_phong_ban ma_nhan_su');
     const nhanVienNotPhongBans = chucVuCoQuans 
     .filter(item => item.ma_phong_ban== null || item.ma_phong_ban==maPhongBan); 
-    console.log(nhanVienNotPhongBans)
     const result = await Promise.all(nhanVienNotPhongBans?.map(async (nhanVien) => {
       const nhanViens = await NhanVienModel.findById(nhanVien?.nhan_vien_id).select('ten_nhan_su');
       return {
