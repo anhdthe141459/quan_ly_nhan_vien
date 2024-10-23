@@ -151,7 +151,7 @@ async function getTongGioLamViecCuaNhanVienMoiThang(year, month, nhan_vien_id) {
 
 const getChamCongNhanVienTheoThang = async(year, month) =>{
 
-    const nhanVienChucVu = await ChucVuCoQuanModel.find({da_nghi_viec:false}).select('ma_nhan_su nhan_vien_id');
+    const nhanVienChucVu = await ChucVuCoQuanModel.find({da_nghi_viec:false}).select('ma_nhan_su nhan_vien_id ma_phong_ban');
     
     const result = await Promise.all(nhanVienChucVu.map(async (nhanVien) => {
       const tenNhanVien = await NhanVienModel.findById(nhanVien.nhan_vien_id).select('ten_nhan_su');
@@ -164,7 +164,7 @@ const getChamCongNhanVienTheoThang = async(year, month) =>{
         trang_thai_nghi_co_phep:trangThaiChamCong?.nghi_co_phep,
         trang_thai_nghi_khong_phep:trangThaiChamCong?.nghi_khong_phep,
         ...chamCong["0"]??{tongSoGioLamViecChinhThuc:0, tongSoGioLamThem: 0},
-        tong_so_gio_lam:chamCong["0"] ? chamCong["0"].tongSoGioLamViecChinhThuc + chamCong["0"].tongSoGioLamThem:0
+        tong_so_gio_lam:chamCong["0"] ? chamCong["0"].tongSoGioLamViecChinhThuc + chamCong["0"].tongSoGioLamThem:0,
       };
     }));
 

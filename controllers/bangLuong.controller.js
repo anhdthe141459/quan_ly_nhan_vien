@@ -42,6 +42,9 @@ const searchBangLuong = async (req, res) => {
     if (query.ten_nhan_su !== 'undefined') {
       searchQuery['nhanVienDetail.ten_nhan_su'] = { $regex: query.ten_nhan_su, $options: 'i' };
     }
+    if (query.ma_phong_ban !== 'undefined') {
+      searchQuery['phongBanDetailIdString'] = { $regex: query.ma_phong_ban, $options: 'i' };
+    }
 
     const bangLuongs= await bangLuongService.searchBangLuong(searchQuery);
     res.json(bangLuongs);
@@ -52,7 +55,22 @@ const searchBangLuong = async (req, res) => {
 
 const downloadExcelBangLuong = async (req, res) => {
   try {
-    const bangLuongs = await bangLuongService.getBangLuongChoNhanViens();
+    const { query } = req;
+
+    const searchQuery = {};
+    searchQuery['chucVuNhanVienDetail.da_nghi_viec'] = false;
+    if (query.ma_nhan_su !== 'undefined') {
+      searchQuery['chucVuNhanVienDetail.ma_nhan_su'] = { $regex: query.ma_nhan_su, $options: 'i' };
+    }
+
+    if (query.ten_nhan_su !== 'undefined') {
+      searchQuery['nhanVienDetail.ten_nhan_su'] = { $regex: query.ten_nhan_su, $options: 'i' };
+    }
+    if (query.ma_phong_ban !== 'undefined') {
+      searchQuery['phongBanDetailIdString'] = { $regex: query.ma_phong_ban, $options: 'i' };
+    }
+
+    const bangLuongs= await bangLuongService.searchBangLuong(searchQuery);
     const data =[
       ['Mã nhân sự','Tên nhân sự','Lương cơ bản','Phụ cấp','Khấu trừ',"Ngày trả lương định kỳ"],
       ...bangLuongs.map(({_id,createdAt,__v,nhan_vien_id,...item}) =>{
@@ -73,11 +91,10 @@ const downloadExcelBangLuong = async (req, res) => {
 
 const downloadExcelThongKeLuongTheoThang = async (req, res) => {
   try {
-    const { year, month } = req.query;
-    const bangLuongs= await bangLuongService.getLuongNhanVienTheoThang(year,month);
+    const {bangLuongs}=req.body;
     const data =[
       ['Mã nhân sự','Tên nhân sự','Tiền lương cơ bản','Tổng số công giờ làm','Tiền lương thực nhận',"Ngày trả lương định kỳ"],
-      ...bangLuongs.map(({_id,nhan_vien_id,...item}) =>{
+      ...bangLuongs.map(({_id,nhan_vien_id,ma_phong_ban,...item}) =>{
         return Object.values({
           ...item,
         })

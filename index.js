@@ -31,12 +31,12 @@ app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });
 
-mongoose.connect(config.connectionString)
+mongoose.connect(process.env.DATABASE_URL)
   .then(() => {
     console.log('MongoDB connected!');
     // Chỉ bắt đầu lắng nghe sau khi MongoDB kết nối thành công
-    app.listen(config.port, () => {
-      console.log(`Server is running on http://localhost:${config.port}`);
+    app.listen(process.env.PORT, () => {
+      console.log(`Server is running on http://localhost:${process.env.PORT}`);
     });
   })
   .catch((error) => {

@@ -52,11 +52,10 @@ const getChamCongNhanVienChiTietTheoThang = async (req, res) => {
 
 const downloadExcelThongKeChamCongTheoThang = async (req, res) => {
   try {
-    const { year, month } = req.query;
-    const chamCongs= await chamCongService.getChamCongNhanVienTheoThang(year,month);
+  const {chamCongs}=req.body;
     const data =[
       ['Mã nhân sự','Tên nhân sự','Số ngày đi làm','Số ngày nghỉ có phép','Số ngày nghỉ không phép',"Số giờ làm việc chính thức","Số giờ làm thêm",'Tổng số giờ làm được trong tháng'],
-      ...chamCongs.map(({_id,nhan_vien_id,...item}) =>{
+      ...chamCongs.map(({_id,nhan_vien_id,ma_phong_ban,...item}) =>{
         return Object.values({
           ...item,
         })

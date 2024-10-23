@@ -135,7 +135,7 @@ const searchNhanVien = async(query) =>{
             $addFields: {
               phongBanDetailIdString: { $toString: '$phongBanDetail._id' }
             }
-          },
+        },
         {
             $match: query,
         },
@@ -149,6 +149,7 @@ const searchNhanVien = async(query) =>{
       const result = nhanViens.map(nhanVien => {
         const nhanSu={
             _id:nhanVien.nhan_vien_id,
+            ma_nhan_su: nhanVien.ma_nhan_su, 
             ten_nhan_su:nhanVien.nhanVienDetail.ten_nhan_su,
             gioi_tinh:nhanVien.nhanVienDetail.gioi_tinh,
             nam_sinh:nhanVien.nhanVienDetail.nam_sinh,
@@ -161,14 +162,13 @@ const searchNhanVien = async(query) =>{
             trinh_do_van_hoa:nhanVien.nhanVienDetail.trinh_do_van_hoa,
             quoc_tich:nhanVien.nhanVienDetail.quoc_tich,
             tinh_trang_hon_nhan:nhanVien.nhanVienDetail.tinh_trang_hon_nhan,
-            ma_nhan_su: nhanVien.ma_nhan_su, 
             chuc_vu: nhanVien.chuc_vu, 
             thoi_gian_cong_hien: nhanVien.thoi_gian_cong_hien,
             so_cccd:nhanVien.nhanVienCCCDDetail.so_cccd,
             ngay_cap_cccd:nhanVien.nhanVienCCCDDetail.ngay_cap_cccd,
             noi_cap_cccd:nhanVien.nhanVienCCCDDetail.noi_cap_cccd,
             ten_phong_ban:nhanVien.phongBanDetail?.ten_phong_ban,
-            ma_phong_ban:nhanVien.phongBanDetail?.ma_phong_ban
+            ma_phong_ban:nhanVien.phongBanDetail?._id
         }
 
         return nhanSu

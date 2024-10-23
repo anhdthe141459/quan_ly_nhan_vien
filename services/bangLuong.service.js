@@ -38,7 +38,7 @@ const createOrUpdateBangLuong = async(bangLuong) =>{
 const getLuongNhanVienTheoThang = async(year, month) =>{
     // const bangLuongs = await BangLuongModel.find();
 
-    const nhanVienChucVu = await ChucVuCoQuanModel.find({da_nghi_viec:false}).select('ma_nhan_su nhan_vien_id');
+    const nhanVienChucVu = await ChucVuCoQuanModel.find({da_nghi_viec:false}).select('ma_nhan_su nhan_vien_id ma_phong_ban');
     
     const result = await Promise.all(nhanVienChucVu.map(async (nhanVien) => {
       const bangLuong = await BangLuongModel.findOne({nhan_vien_id:nhanVien.nhan_vien_id});
@@ -93,20 +93,40 @@ const searchBangLuong = async(query) =>{
           {
               $unwind:  { path: '$chucVuNhanVienDetail', preserveNullAndEmptyArrays: true },
           },     
+          {
+            $lookup: {
+              from: 'phong_bans', 
+              localField: 'chucVuNhanVienDetail.ma_phong_ban',
+              foreignField: '_id',
+              as: 'phongBanDetail',
+            },
+          },
+          {
+              $unwind:  { path: '$phongBanDetail', preserveNullAndEmptyArrays: true },
+          }, 
+          {
+            $addFields: {
+              phongBanDetailIdString: { $toString: '$phongBanDetail._id' }
+            }
+        },
         {
             $match: query,
         }
       ]);
+      console.log(bangLuongs)
 
       const result = bangLuongs.map(bangLuong => {
         return {
             ...bangLuong._doc,
-            ten_nhan_su:bangLuong.nhanVienDetail.ten_nhan_su,
             ma_nhan_su:bangLuong.chucVuNhanVienDetail.ma_nhan_su,
+            ten_nhan_su:bangLuong.nhanVienDetail.ten_nhan_su,
+            tien_luong:bangLuong.tien_luong,
+            phu_cap:bangLuong.phu_cap,
+            khau_tru:bangLuong.khau_tru,
+            ngay_tra_luong:bangLuong.ngay_tra_luong
           };
 
     });
-
     return result;
   }
   

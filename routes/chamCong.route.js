@@ -7,7 +7,7 @@ router.get('/getChamCongMoiNgay/:maPhongBan',verifyTokenController.verifyToken, 
 router.get('/getChamCongMoiThang',verifyTokenController.verifyToken, chamCongController.getChamCongNhanVienTheoThang);
 router.get('/getChamCongNhanVienChitTietTheoThang',verifyTokenController.verifyToken, chamCongController.getChamCongNhanVienChiTietTheoThang);
 router.get('/getTrangThaiCuaNhanVienMoiThang',verifyTokenController.verifyToken, chamCongController.getTrangThaiCuaNhanVienMoiThang);
-router.get('/downloadExcelChamCongTheoThang',verifyTokenController.verifyToken, chamCongController.downloadExcelThongKeChamCongTheoThang);
+router.post('/downloadExcelChamCongTheoThang',verifyTokenController.verifyToken, chamCongController.downloadExcelThongKeChamCongTheoThang);
 router.post('/create',verifyTokenController.verifyToken, chamCongController.createChamCongs);
 
 
