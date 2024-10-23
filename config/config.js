@@ -5,7 +5,7 @@ module.exports= {
     port: 8383,
 
     //url to asset database
-    connectionString: "mongodb+srv://anh:kingleo142000@anh.cnehn.mongodb.net/quan_ly_nhan_vien",
+    connectionString: process.env.DATABASE_URL,
 
 
     //redis configuration
