@@ -178,7 +178,7 @@ const getChamCongNhanVienChiTietTheoThang = async(year, month, id) => {
             $lt:  new Date(year, month, 1)     
         },
         nhan_vien_id: id
-    });
+    }).sort({ ngay_cham_cong: 1 });
 }
 
 module.exports = {

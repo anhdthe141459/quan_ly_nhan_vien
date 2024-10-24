@@ -37,19 +37,16 @@ const createOrUpdatePhongBan = async(phongBan) =>{
         const phongBanMoi=new PhongBanModel(phongBan);
         await phongBanMoi.save();
         if(phongBan.hasOwnProperty('ma_truong_phong')){
-          console.log("phongBanMoi=======",phongBanMoi._id)
           await ChucVuCoQuanModel.updateOne({nhan_vien_id:phongBan.ma_truong_phong},{ ma_phong_ban: phongBanMoi._id });
         }
     }else{
         let phongBanUpdate=await PhongBanModel.findById(phongBan?._id);
         if(!phongBan.hasOwnProperty('ma_truong_phong')){
-          console.log("phongBan=======",phongBan)
             phongBan.ma_truong_phong=null;
         }
         if(phongBan.ma_truong_phong==null){
           nhanVienChucVu = await ChucVuCoQuanModel.findOne({ nhan_vien_id: phongBanUpdate?.ma_truong_phong });
           if(nhanVienChucVu){
-            console.log("nhanVienChucVu1=======",nhanVienChucVu)
             nhanVienChucVu.ma_phong_ban=null;
             nhanVienChucVu.save();
           }

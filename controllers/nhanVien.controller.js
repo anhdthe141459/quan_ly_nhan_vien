@@ -42,7 +42,7 @@ const excelService = require('../services/excel.service');
       }
 
       if (query.gioi_tinh !== 'undefined') {
-        searchQuery['nhanVienDetail.gioi_tinh'] = { $regex: query.gioi_tinh, $options: 'i' };
+        searchQuery['nhanVienDetail.gioi_tinh'] = { $regex: `^${query.gioi_tinh}$`, $options: 'i' };
       }
 
       if (query.nguyen_quan !== 'undefined') {
@@ -115,7 +115,7 @@ const excelService = require('../services/excel.service');
       }
 
       if (query.gioi_tinh !== 'undefined') {
-        searchQuery['nhanVienDetail.gioi_tinh'] = { $regex: query.gioi_tinh, $options: 'i' };
+        searchQuery['nhanVienDetail.gioi_tinh'] = { $regex: `^${query.gioi_tinh}$`, $options: 'i' };
       }
 
       if (query.nguyen_quan !== 'undefined') {
@@ -150,7 +150,6 @@ const excelService = require('../services/excel.service');
         searchQuery['phongBanDetailIdString'] = { $regex: query.phong_ban_id, $options: 'i' };
       }
       const nhanViens = await nhanVienService.searchNhanVien(searchQuery);
-      console.log(nhanViens)
       const data =[
         ['Mã nhân sự','Tên nhân sự','Giới tính','Ngày sinh','Nơi sinh','Nguyên quán','Địa chỉ hiện tại','Số điện thoại',
           'Dân tộc','Tôn giáo','Tình trạng hôn nhân','Trình độ văn hóa','Quốc tịch','Chức vụ','Số năm cống hiến','Số CCCD','Ngày cấp CCCD','Nơi cấp CCCD','Phòng ban',],

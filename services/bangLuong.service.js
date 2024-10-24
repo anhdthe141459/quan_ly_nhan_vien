@@ -49,7 +49,7 @@ const getLuongNhanVienTheoThang = async(year, month) =>{
         let tongSoCongNhanVien=0;
         if(tongSoGioLamViecNhanVien[0]!=undefined){
             tongSoCongNhanVien = tongSoGioLamViecNhanVien[0]?.tongSoGioLamViecChinhThuc+tongSoGioLamViecNhanVien[0]?.tongSoGioLamThem;
-            const soLuongTheoGioNhanVien = bangLuong.tien_luong/40;
+            const soLuongTheoGioNhanVien = bangLuong.tien_luong/160;
             tongSoLuongThucNhanNhanVien = (soLuongTheoGioNhanVien.toFixed(2) * tongSoCongNhanVien) + bangLuong.phu_cap - bangLuong.khau_tru;
         }
 
@@ -113,7 +113,6 @@ const searchBangLuong = async(query) =>{
             $match: query,
         }
       ]);
-      console.log(bangLuongs)
 
       const result = bangLuongs.map(bangLuong => {
         return {
