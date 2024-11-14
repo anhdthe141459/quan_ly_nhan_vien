@@ -113,6 +113,23 @@ const phongBanservice =require('../services/phongBan.service');
       res.status(500).json({ message: error.message });
     }
   };
+  const genaratePhongBanData = async (req, res) => {
+    try {
+      await phongBanservice.genaratePhongBanData();
+      res.status(201).json({ message: 'Đã tựu động tạo thành công phòng ban' });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
+
+  const deleteAllDataPhongBan = async (req, res) => {
+    try {
+      await phongBanservice.deleteAllDataPhongBan();
+      res.status(201).json({ message: 'Đã xóa tất cả phòng ban thành công' });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
 
 module.exports = {
     getPhongBans,
@@ -123,5 +140,7 @@ module.exports = {
     getAllTenPhongBan,
     getAllNhanVienPhongBan,
     searchPhongBan,
-    countPhongBan
+    countPhongBan,
+    genaratePhongBanData,
+    deleteAllDataPhongBan
 };

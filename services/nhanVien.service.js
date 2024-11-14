@@ -5,24 +5,63 @@ const PhongBanModel = require('../models/phongBan.model');
 const BangLuongModel = require('../models/bangLuong.model');
 const { getAllNhanVienNotPhongBan } = require('./phongBan.service');
 
-const getNhanViens = async() =>{
 
-    
-    const nhanVienChucVus = await ChucVuCoQuanModel.find({da_nghi_viec:false });
-      const result = await Promise.all(nhanVienChucVus.map(async (nhanVien) => {
-      const nhanVienDetail = await NhanVienModel.findById(nhanVien.nhan_vien_id);
-      const nhanVienCCCDDetail = await NhanVienCCCDModel.findOne({ nhan_vien_id: nhanVien.nhan_vien_id });
-      const phongBanDetail = await PhongBanModel.findById(nhanVien?.ma_phong_ban).select('ten_phong_ban');
+const getNhanViens = async (page, limit) => {
+  const skip = (page - 1) * limit;
 
-      return {
-        ...nhanVien._doc,
-        nhanVienDetail,      
-        nhanVienCCCDDetail,
-        phongBanDetail      
-      };
-    }));
+  const nhanVienChucVus = await ChucVuCoQuanModel.aggregate([
+    { $match: { da_nghi_viec: false } },
+    { $sort: { createdAt: -1 } },
+    { $skip: skip },
+    { $limit: Number(limit) },
+    {
+      $lookup: {
+        from: 'nhan_viens', 
+        localField: 'nhan_vien_id',
+        foreignField: '_id',
+        as: 'nhanVienDetail',
+      },
+    },
+    {
+        $unwind:  { path: '$nhanVienDetail', preserveNullAndEmptyArrays: true },
+    },
+    {
+    $lookup: {
+        from: 'phong_bans', 
+        localField: 'ma_phong_ban',
+        foreignField: '_id',
+        as: 'phongBanDetail',
+    },
+    },
+    {
+      $unwind:  { path: '$phongBanDetail', preserveNullAndEmptyArrays: true },
+    },
+    {
+    $lookup: {
+        from: 'nhan_vien_cccds', 
+        localField: 'nhan_vien_id',
+        foreignField: 'nhan_vien_id',
+        as: 'nhanVienCCCDDetail',
+    },
+    },
+    {
+    $unwind:  { path: '$nhanVienCCCDDetail', preserveNullAndEmptyArrays: true },
+    },
+    {
+        $addFields: {
+          phongBanDetailIdString: { $toString: '$phongBanDetail._id' }
+        }
+    },
+    {
+      $project: {
+        phongBanDetailIdString: 0,
+        'nhanVienDetail.avatar': 0,
+        'nhanVienCCCDDetail._id': 0,
+      }
+  },
+  ]);
 
-    const data = result.map(nhanVien => {
+      const data = nhanVienChucVus.map(nhanVien => {
         const nhanSu={
             _id:nhanVien.nhan_vien_id,
             ma_nhan_su: nhanVien.ma_nhan_su, 
@@ -38,6 +77,7 @@ const getNhanViens = async() =>{
             trinh_do_van_hoa:nhanVien.nhanVienDetail.trinh_do_van_hoa,
             quoc_tich:nhanVien.nhanVienDetail.quoc_tich,
             tinh_trang_hon_nhan:nhanVien.nhanVienDetail.tinh_trang_hon_nhan,
+            // avatar:nhanVien.nhanVienDetail.avatar,
             chuc_vu: nhanVien.chuc_vu, 
             thoi_gian_cong_hien: nhanVien.thoi_gian_cong_hien,
             so_cccd:nhanVien.nhanVienCCCDDetail.so_cccd,
@@ -48,7 +88,20 @@ const getNhanViens = async() =>{
         }
         return nhanSu
     });
-    return data;
+
+  const total = await ChucVuCoQuanModel.countDocuments({ da_nghi_viec: false });
+  return {
+    data: data,
+    total,
+    totalPages: Math.ceil(total / limit),
+    currentPage: page,
+  };
+};
+
+
+
+const getAvatarNhanVien = async (nhan_vien_id) =>{
+    return await NhanVienModel.findById(nhan_vien_id).select('avatar')
 }
 
 const createOrUpdateNhanVien = async(nhanVien,chucVuCoQuan,nhanVienCccd) =>{
@@ -96,7 +149,102 @@ const choNhanVienNghiViec = async(id) =>{
     );
 }
 
-const searchNhanVien = async(query) =>{
+const searchNhanVien = async (query, page, limit = 10) => {
+    const skip = (page - 1) * limit;
+
+    const nhanViens = await ChucVuCoQuanModel.aggregate([
+        {
+            $lookup: {
+                from: 'nhan_viens',
+                localField: 'nhan_vien_id',
+                foreignField: '_id',
+                as: 'nhanVienDetail',
+                pipeline: [
+                    { $project: { ten_nhan_su: 1, gioi_tinh: 1, nam_sinh: 1, noi_sinh: 1, nguyen_quan: 1, dia_chi_hien_tai: 1, so_dien_thoai: 1, dan_toc: 1, ton_giao: 1, trinh_do_van_hoa: 1, quoc_tich: 1, tinh_trang_hon_nhan: 1 } }
+                ]
+            }
+        },
+        { $unwind: { path: '$nhanVienDetail', preserveNullAndEmptyArrays: true } },
+        {
+            $lookup: {
+                from: 'phong_bans',
+                localField: 'ma_phong_ban',
+                foreignField: '_id',
+                as: 'phongBanDetail',
+                pipeline: [
+                    { $project: { ten_phong_ban: 1 } }
+                ]
+            }
+        },
+        { $unwind: { path: '$phongBanDetail', preserveNullAndEmptyArrays: true } },
+        {
+            $lookup: {
+                from: 'nhan_vien_cccds',
+                localField: 'nhan_vien_id',
+                foreignField: 'nhan_vien_id',
+                as: 'nhanVienCCCDDetail',
+                pipeline: [
+                    { $project: { so_cccd: 1, ngay_cap_cccd: 1, noi_cap_cccd: 1 } }
+                ]
+            }
+        },
+        { $unwind: { path: '$nhanVienCCCDDetail', preserveNullAndEmptyArrays: true } },
+        { $addFields: { phongBanDetailIdString: { $toString: '$phongBanDetail._id' } } },
+        { $match: query },
+        {
+            $facet: {
+                totalCount: [{ $count: "total" }],
+                data: [
+                    { $sort: { createdAt: -1 } },
+                    { $skip: skip },
+                    { $limit: limit },
+                    {
+                        $project: {
+                            phongBanDetailIdString: 0,
+                            'nhanVienDetail.avatar': 0 // loại bỏ trường không cần thiết
+                        }
+                    }
+                ]
+            }
+        }
+    ]);
+
+    const data = nhanViens[0].data.map(nhanVien => ({
+        _id: nhanVien.nhan_vien_id,
+        ma_nhan_su: nhanVien.ma_nhan_su,
+        ten_nhan_su: nhanVien.nhanVienDetail.ten_nhan_su,
+        gioi_tinh: nhanVien.nhanVienDetail.gioi_tinh,
+        nam_sinh: nhanVien.nhanVienDetail.nam_sinh,
+        noi_sinh: nhanVien.nhanVienDetail.noi_sinh,
+        nguyen_quan: nhanVien.nhanVienDetail.nguyen_quan,
+        dia_chi_hien_tai: nhanVien.nhanVienDetail.dia_chi_hien_tai,
+        so_dien_thoai: nhanVien.nhanVienDetail.so_dien_thoai,
+        dan_toc: nhanVien.nhanVienDetail.dan_toc,
+        ton_giao: nhanVien.nhanVienDetail.ton_giao,
+        trinh_do_van_hoa: nhanVien.nhanVienDetail.trinh_do_van_hoa,
+        quoc_tich: nhanVien.nhanVienDetail.quoc_tich,
+        tinh_trang_hon_nhan: nhanVien.nhanVienDetail.tinh_trang_hon_nhan,
+        chuc_vu: nhanVien.chuc_vu,
+        thoi_gian_cong_hien: nhanVien.thoi_gian_cong_hien,
+        so_cccd: nhanVien.nhanVienCCCDDetail.so_cccd,
+        ngay_cap_cccd: nhanVien.nhanVienCCCDDetail.ngay_cap_cccd,
+        noi_cap_cccd: nhanVien.nhanVienCCCDDetail.noi_cap_cccd,
+        ten_phong_ban: nhanVien.phongBanDetail?.ten_phong_ban,
+        ma_phong_ban: nhanVien.phongBanDetail?._id
+    }));
+
+    const total = nhanViens[0].totalCount[0] ? nhanViens[0].totalCount[0].total : 0;
+
+    return {
+        data,
+        total,
+        totalPages: Math.ceil(total / limit),
+        currentPage: page,
+    };
+}
+
+
+const downloadExcelNhanVien = async(query) =>{
     const nhanViens=await ChucVuCoQuanModel.aggregate([
         {
           $lookup: {
@@ -141,7 +289,8 @@ const searchNhanVien = async(query) =>{
         },
         {
             $project: {
-              phongBanDetailIdString: 0 // Ẩn trường tạm thời
+              phongBanDetailIdString: 0, // Ẩn trường tạm thời
+              'nhanVienDetail.avatar': 0,
             }
           }
       ]);
@@ -184,7 +333,10 @@ const getAllTenNhanVienChuaCoBangLuong = async() =>{
     const nhanVienChuaCoBangLuongs = await ChucVuCoQuanModel.find({
         da_nghi_viec:false,
         nhan_vien_id: { $nin: bangLuongs?.map(bl => bl.nhan_vien_id) }
-      }).populate('nhan_vien_id'); 
+      }).populate({
+        path: 'nhan_vien_id',
+        select: '-avatar', // Dấu trừ (-) phía trước 'avatar' sẽ loại bỏ trường này khỏi kết quả
+      }); 
     const result = nhanVienChuaCoBangLuongs?.map( (nhanVien) =>{
         return {
           nhan_vien_id:nhanVien.nhan_vien_id._id,
@@ -206,10 +358,12 @@ const countNhanVien = async() =>{
 
 module.exports = {
     getNhanViens,
+    getAvatarNhanVien,
     createOrUpdateNhanVien,
     removeNhanVien,
     choNhanVienNghiViec,
     searchNhanVien,
     getAllTenNhanVienChuaCoBangLuong,
-    countNhanVien
+    countNhanVien,
+    downloadExcelNhanVien
 };

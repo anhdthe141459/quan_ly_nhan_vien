@@ -12,5 +12,7 @@ router.get('/getAllNhanVienNotPhongBan/:maPhongBan',verifyTokenController.verify
 router.get('/getAllNhanVienPhongBan/:maPhongBan',verifyTokenController.verifyToken, phongBanController.getAllNhanVienPhongBan);
 router.get('/search',verifyTokenController.verifyToken, phongBanController.searchPhongBan);
 router.delete('/delete/:id',verifyTokenController.verifyToken, phongBanController.removePhongBan);
+router.post('/genaratePhongBanData',verifyTokenController.verifyToken, phongBanController.genaratePhongBanData);
+router.delete('/deleteAllData',verifyTokenController.verifyToken, phongBanController.deleteAllDataPhongBan);
 
 module.exports = router;

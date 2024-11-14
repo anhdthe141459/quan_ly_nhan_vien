@@ -20,15 +20,18 @@ const chucVuCoQuanSchema = new mongoose.Schema({
   thoi_gian_cong_hien: {
     type: Number,
   },
-  email:{
-    type:String,
-  },
+  // email:{
+  //   type:String,
+  // },
   da_nghi_viec: { type: Boolean, default: false },
   createdAt: {
     type: Date,
     default: Date.now
   }
 });
+
+chucVuCoQuanSchema.index({ da_nghi_viec: 1, createdAt: 1 });
+chucVuCoQuanSchema.index({ ma_phong_ban: 1 });
 
 // Tạo model từ schema
 const ChucVuCoQuanModel = mongoose.model('chuc_vu_co_quan', chucVuCoQuanSchema);

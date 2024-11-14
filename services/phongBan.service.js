@@ -67,7 +67,7 @@ const removePhongBan = async(id) =>{
 }
 
 const searchNhanVien = async(query) =>{
-    const nhanViens= await NhanVienModel.find(query);
+    const nhanViens= await NhanVienModel.find(query).select('-avatar');
     return nhanViens;
 }
 
@@ -88,7 +88,10 @@ const getAllNhanVienNotPhongBan = async (maPhongBan) =>{
 
 const getAllNhanVienPhongBan = async (maPhongBan) =>{
   if(maPhongBan=='all'){
-    const chucVuCoQuans = await ChucVuCoQuanModel.find({da_nghi_viec : false}).populate('nhan_vien_id');
+    const chucVuCoQuans = await ChucVuCoQuanModel.find({da_nghi_viec : false}).populate({
+      path: 'nhan_vien_id',
+      select: '-avatar', // Dấu trừ (-) phía trước 'avatar' sẽ loại bỏ trường này khỏi kết quả
+    });
     const nhanViens=chucVuCoQuans.map( (chucVuCoQuan) =>{
       return {
         nhan_vien_id:chucVuCoQuan.nhan_vien_id._id,
@@ -132,6 +135,10 @@ const countPhongBan = async() =>{
   return await PhongBanModel.countDocuments();
 }
 
+// ====================================  genarate data ===================================================================
+
+
+
 
 module.exports = {
     getPhongBans,
@@ -142,5 +149,5 @@ module.exports = {
     getAllTenPhongBan,
     getAllNhanVienPhongBan,
     searchPhongBan,
-    countPhongBan
+    countPhongBan,
 };

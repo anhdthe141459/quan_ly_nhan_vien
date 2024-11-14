@@ -4,6 +4,7 @@ const nhanVienController = require('../controllers/nhanVien.controller');
 const verifyTokenController = require('../controllers/verifyToken');
 
 router.get('/getAllNhanVien',verifyTokenController.verifyToken, nhanVienController.getNhanViens);
+router.get('/getAvatar/:id',verifyTokenController.verifyToken, nhanVienController.getAvatarNhanVien);
 router.post('/crateOrUpdate',verifyTokenController.verifyToken, nhanVienController.createOrUpdateNhanVien);
 router.delete('/delete/:id',verifyTokenController.verifyToken, nhanVienController.choNhanVienNghiViec);
 router.get('/search',verifyTokenController.verifyToken, nhanVienController.searchNhanVien);

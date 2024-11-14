@@ -21,7 +21,7 @@ app.use(cors({
 }));
 app.use(cookieParser());
 // Middleware để parse JSON body
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 // Middleware để parse URL-encoded data (form submissions)
 app.use(express.urlencoded({ extended: true }));
@@ -32,7 +32,7 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });
-
+console.log("process.env.DATABASE_URL========",process.env.DATABASE_URL)
 mongoose.connect(process.env.DATABASE_URL)
   .then(() => {
     console.log('MongoDB connected!');

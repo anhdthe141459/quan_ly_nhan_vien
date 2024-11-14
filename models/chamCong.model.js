@@ -33,6 +33,8 @@ const chamCongSchema = new mongoose.Schema({
   }
 });
 
+chamCongSchema.index({ ngay_cham_cong: 1 });
+
 // Tạo model từ schema
 const ChamCongModel = mongoose.model('cham_cong', chamCongSchema);
 

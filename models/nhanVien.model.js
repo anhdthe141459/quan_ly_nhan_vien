@@ -1,10 +1,6 @@
 const mongoose = require('mongoose');
 
 const nhanVienSchema = new mongoose.Schema({
-  // ma_so_nhan_su: {
-  //   type: String,
-  //   required: true,
-  // },
   ten_nhan_su: {
     type: String,
     required: true,
@@ -47,9 +43,8 @@ const nhanVienSchema = new mongoose.Schema({
   tinh_trang_hon_nhan: {
     type: String,
   },
-  ma_phong_ban:{
-    type:mongoose.Schema.Types.ObjectId,
-    ref:'phong_ban'
+  avatar: {
+    type: String,
   },
   createdAt: {
     type: Date,
