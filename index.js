@@ -11,7 +11,7 @@ const routes = require('./routes');
 const chamCongService = require('./services/chamCong.service')
 const phongBanService = require('./services/phongBan.service')
 const xlsx = require('xlsx');
-const ChamCongModel = require('./models/chamCong.model');
+
 
 dotenv.config();
 
@@ -32,7 +32,7 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });
-console.log("process.env.DATABASE_URL========",process.env.DATABASE_URL)
+
 mongoose.connect(process.env.DATABASE_URL)
   .then(() => {
     console.log('MongoDB connected!');

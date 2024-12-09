@@ -143,9 +143,9 @@ const excelService = require('../services/excel.service');
         searchQuery['ma_nhan_su'] = { $regex: query.ma_nhan_su, $options: 'i' };
       }
 
-      if (query.thoi_gian_cong_hien !== 'undefined') {
-        searchQuery['thoi_gian_cong_hien'] = { $regex: query.thoi_gian_cong_hien, $options: 'i' };
-      }
+      // if (query.thoi_gian_cong_hien !== 'undefined') {
+      //   searchQuery['thoi_gian_cong_hien'] = { $regex: query.thoi_gian_cong_hien, $options: 'i' };
+      // }
 
       if (query.chuc_vu !== 'undefined') {
         searchQuery['chuc_vu'] = { $regex: query.chuc_vu, $options: 'i' };
