@@ -1,8 +1,9 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const nhanVienSchema = new mongoose.Schema({
   ten_nhan_su: {
     type: String,
+    encrypted: true,
     required: true,
   },
   gioi_tinh: {
@@ -26,7 +27,7 @@ const nhanVienSchema = new mongoose.Schema({
   },
   quoc_tich: {
     type: String,
-    required:true
+    required: true,
   },
   so_dien_thoai: {
     type: String,
@@ -48,11 +49,11 @@ const nhanVienSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
 // Tạo model từ schema
-const NhanVienModel = mongoose.model('nhan_vien', nhanVienSchema);
+const NhanVienModel = mongoose.model("nhan_vien", nhanVienSchema);
 
 module.exports = NhanVienModel;

@@ -1,12 +1,13 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const bangLuongSchema = new mongoose.Schema({
-  nhan_vien_id:{
-    type:mongoose.Schema.Types.ObjectId,
-    ref:'nhan_vien'
+  nhan_vien_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "nhan_vien",
   },
   tien_luong: {
     type: Number,
+    encrypted: true,
   },
   // tien_luong_thuc_nhan: {
   //   type: Number,
@@ -22,11 +23,11 @@ const bangLuongSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
 // Tạo model từ schema
-const BangLuongModel = mongoose.model('bang_luong', bangLuongSchema);
+const BangLuongModel = mongoose.model("bang_luong", bangLuongSchema);
 
 module.exports = BangLuongModel;
