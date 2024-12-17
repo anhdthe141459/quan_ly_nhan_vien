@@ -36,9 +36,10 @@ app.listen(port, () => {
 });
 
 const localMasterKey = readMasterKey();
-const connectionString = "mongodb://localhost:27017/quan_ly_nhan_vien";
+const connectionString = process.env.DATABASE_URL;
 
-const dataKey = "ktELujgWSzCtl/ziM7XVHw==";
+const dataKey = "ktELujgWSzCtl/ziM7XVHw=="; //master-key in here
+
 const csfleHelper = new CsfleHelper({
   // The client expects a key management system to store and provide the application's master encryption key. For now, we will use a local master key, so they use the local KMS provider.
   kmsProviders: {
@@ -54,19 +55,19 @@ csfleHelper.getCsfleEnabledConnection(schemeMap);
 
 // Lập lịch add chấm công vào mỗi ngày lúc 0:00 giờ sáng
 
-cron.schedule(
-  "00 0 * * 1-5",
-  async () => {
-    const today = new Date();
-    const day = today.getDay();
+// cron.schedule(
+//   "00 0 * * 1-5",
+//   async () => {
+//     const today = new Date();
+//     const day = today.getDay();
 
-    if (day !== 0) {
-      await chamCongService.createChamCongs();
-    }
-  },
-  {
-    timezone: "Asia/Ho_Chi_Minh", // Đảm bảo công việc chạy theo múi giờ của bạn
-  }
-);
+//     if (day !== 0) {
+//       await chamCongService.createChamCongs();
+//     }
+//   },
+//   {
+//     timezone: "Asia/Ho_Chi_Minh", // Đảm bảo công việc chạy theo múi giờ của bạn
+//   }
+// );
 
 app.use("/", routes);

@@ -1,19 +1,21 @@
-const phongBanservice = require("./phongBan.service")
+const phongBanservice = require("./phongBan.service");
 const ChamCongModel = require("../models/chamCong.model");
 const ChucVuCoQuanModel = require("../models/chucVuCoQuan.model");
 const NhanVienModel = require("../models/nhanVien.model");
-const mongoose = require('mongoose');
-
-
+const mongoose = require("mongoose");
 
 const getChamCongMoiNgay = async (maPhongBan) => {
   const today = new Date().setHours(0, 0, 0, 0);
 
   // Fetch all employees in the specified department
-  const allNhanVienChamCong = await phongBanservice.getAllNhanVienPhongBan(maPhongBan);
-  
+  const allNhanVienChamCong = await phongBanservice.getAllNhanVienPhongBan(
+    maPhongBan
+  );
+
   // Prepare an array of employee IDs to batch-query attendance data
-  const nhanVienIds = allNhanVienChamCong.map((nv) => new mongoose.Types.ObjectId(nv.nhan_vien_id));
+  const nhanVienIds = allNhanVienChamCong.map(
+    (nv) => new mongoose.Types.ObjectId(nv.nhan_vien_id)
+  );
 
   // Fetch all attendance records for employees in the specified department for today
   const chamCongRecords = await ChamCongModel.find({
@@ -31,7 +33,7 @@ const getChamCongMoiNgay = async (maPhongBan) => {
   const data = allNhanVienChamCong.map((nhanVienChamCong) => {
     const chamCong = chamCongMap[nhanVienChamCong.nhan_vien_id];
     return {
-      ...chamCong || {}, // Use chamCong if available, otherwise an empty object
+      ...(chamCong || {}), // Use chamCong if available, otherwise an empty object
       ten_nhan_su: nhanVienChamCong.ten_nhan_su,
       ma_nhan_su: nhanVienChamCong.ma_nhan_su,
       nhan_vien_id: nhanVienChamCong.nhan_vien_id,
@@ -41,23 +43,22 @@ const getChamCongMoiNgay = async (maPhongBan) => {
   return data;
 };
 
-
-const createChamCongs = async() =>{
-    const chamCongs = await getDataDeThemVaoChamCongHangNgay();
-    ChamCongModel.insertMany(chamCongs)  
+const createChamCongs = async () => {
+  const chamCongs = await getDataDeThemVaoChamCongHangNgay();
+  ChamCongModel.insertMany(chamCongs)
     .then((docs) => {
-        return('success');
+      return "success";
     })
     .catch((err) => {
-        console.error('Error:', err);
-        return('error');
+      console.error("Error:", err);
+      return "error";
     });
-}
+};
 
-const updateChamCong = async(chamCong) =>{
-  if(chamCong.hasOwnProperty('_id')){
-    Object.keys(chamCong).forEach(key => {
-      if (chamCong[key] === null || chamCong[key] ==='') {
+const updateChamCong = async (chamCong) => {
+  if (chamCong.hasOwnProperty("_id")) {
+    Object.keys(chamCong).forEach((key) => {
+      if (chamCong[key] === null || chamCong[key] === "") {
         delete chamCong[key];
       }
     });
@@ -70,31 +71,26 @@ const updateChamCong = async(chamCong) =>{
         { overwrite: true }
       );
     }
-
-  }else{
+  } else {
     ChamCongModel.create(chamCong);
   }
+};
 
- }
+const updateManyChamCong = async (chamCongs) => {
+  await Promise.all(chamCongs?.map((chamCong) => updateChamCong(chamCong)));
+};
 
-const updateManyChamCong = async(chamCongs) =>{
-    await Promise.all(chamCongs?.map((chamCong) => updateChamCong(chamCong)))
-}
-
-
-
-const getDataDeThemVaoChamCongHangNgay = async () =>{
-    const chamCongs= await phongBanservice.getAllNhanVienPhongBan('all');
-    const today = new Date().setHours(0, 0, 0, 0);
-    const listChamCongTheoNgay= chamCongs?.map( (chamCong) => {
-        return{
-            ...chamCong,
-            ngay_cham_cong:today
-        }
-    });
-    return listChamCongTheoNgay;
-}
-
+const getDataDeThemVaoChamCongHangNgay = async () => {
+  const chamCongs = await phongBanservice.getAllNhanVienPhongBan("all");
+  const today = new Date().setHours(0, 0, 0, 0);
+  const listChamCongTheoNgay = chamCongs?.map((chamCong) => {
+    return {
+      ...chamCong,
+      ngay_cham_cong: today,
+    };
+  });
+  return listChamCongTheoNgay;
+};
 
 async function getTongGioLamViecCuaNhanVienMoiThang(year, month, nhan_vien_id) {
   return await ChamCongModel.aggregate([
@@ -110,58 +106,57 @@ async function getTongGioLamViecCuaNhanVienMoiThang(year, month, nhan_vien_id) {
     {
       $group: {
         _id: null,
-        tongSoGioLamViecChinhThuc: { $sum: '$so_gio_lam_viec' },
-        tongSoGioLamThem: { $sum: '$so_gio_lam_them' },
+        tongSoGioLamViecChinhThuc: { $sum: "$so_gio_lam_viec" },
+        tongSoGioLamThem: { $sum: "$so_gio_lam_them" },
       },
     },
   ]).project({ _id: 0 });
 }
 
+async function getTrangThaiCuaNhanVienMoiThang(year, month, id) {
+  const nhanVien = await ChucVuCoQuanModel.findOne({ nhan_vien_id: id });
+  const result = await ChamCongModel.aggregate([
+    {
+      // Lọc các tài liệu theo tháng, năm và mã nhân viên đã cho
+      $match: {
+        ngay_cham_cong: {
+          $gte: new Date(year, month - 1, 1), // Ngày đầu tiên của tháng
+          $lt: new Date(year, month, 1), // Ngày đầu tiên của tháng tiếp theo
+        },
+        // status: { $in: ['co_mat', 'nghi_co_phep','nghi_khong_phep'] },
+        nhan_vien_id: nhanVien.nhan_vien_id,
+      },
+    },
+    {
+      $group: {
+        _id: "$trang_thai",
+        count: { $sum: 1 },
+      },
+    },
+  ]);
 
-  async function getTrangThaiCuaNhanVienMoiThang(year, month, id) {
-    const nhanVien = await ChucVuCoQuanModel.findOne({nhan_vien_id:id});
-    const result = await ChamCongModel.aggregate([
-      {
-        // Lọc các tài liệu theo tháng, năm và mã nhân viên đã cho
-        $match: {
-            ngay_cham_cong: {
-            $gte: new Date(year, month - 1, 1), // Ngày đầu tiên của tháng
-            $lt: new Date(year, month, 1), // Ngày đầu tiên của tháng tiếp theo
-          },
-          // status: { $in: ['co_mat', 'nghi_co_phep','nghi_khong_phep'] },
-          nhan_vien_id: nhanVien.nhan_vien_id,
-        },
-      },
-      {
-        $group: {
-          _id: '$trang_thai',
-          count: { $sum: 1 },
-        },
-      },
-    ]);
-          
-    const counts = {
-      co_mat: 0,
-      nghi_co_phep: 0,
-      nghi_khong_phep: 0
-    };
-   
-    result.forEach(item => {
-      if (item._id === 'co_mat') {
-        counts.co_mat = item.count;
-      } else if (item._id === 'nghi_co_phep' ||item._id ==null ) {
-        counts.nghi_co_phep = item.count;
-      }else if (item._id === 'nghi_khong_phep') {
-        counts.nghi_khong_phep = item.count;
-      }
-    });
-    return counts
-  }
+  const counts = {
+    co_mat: 0,
+    nghi_co_phep: 0,
+    nghi_khong_phep: 0,
+  };
+
+  result.forEach((item) => {
+    if (item._id === "co_mat") {
+      counts.co_mat = item.count;
+    } else if (item._id === "nghi_co_phep" || item._id == null) {
+      counts.nghi_co_phep = item.count;
+    } else if (item._id === "nghi_khong_phep") {
+      counts.nghi_khong_phep = item.count;
+    }
+  });
+  return counts;
+}
 
 // const getChamCongNhanVienTheoThang = async(year, month) =>{
 
 //     const nhanVienChucVu = await ChucVuCoQuanModel.find({da_nghi_viec:false}).select('ma_nhan_su nhan_vien_id ma_phong_ban');
-    
+
 //     const result = await Promise.all(nhanVienChucVu.map(async (nhanVien) => {
 //       const tenNhanVien = await NhanVienModel.findById(nhanVien.nhan_vien_id).select('ten_nhan_su');
 //       const chamCong = await getTongGioLamViecCuaNhanVienMoiThang(year, month,nhanVien.nhan_vien_id);
@@ -182,13 +177,16 @@ async function getTongGioLamViecCuaNhanVienMoiThang(year, month, nhan_vien_id) {
 
 const getChamCongNhanVienTheoThang = async (year, month) => {
   const [nhanVienChucVuList, nhanVienList] = await Promise.all([
-    ChucVuCoQuanModel.find({ da_nghi_viec: false }).select('ma_nhan_su nhan_vien_id ma_phong_ban').lean(),
-    NhanVienModel.find().select('ten_nhan_su').lean()
+    ChucVuCoQuanModel.find({ da_nghi_viec: false })
+      .select("ma_nhan_su nhan_vien_id ma_phong_ban")
+      .lean(),
+    NhanVienModel.find().select("ten_nhan_su").lean(),
   ]);
 
   const nhanVienIds = nhanVienChucVuList.map((nv) => nv.nhan_vien_id);
 
-  const chamCongData = await ChamCongModel.aggregate([
+  // Aggregation cho giờ làm việc
+  const hours = await ChamCongModel.aggregate([
     {
       $match: {
         ngay_cham_cong: {
@@ -199,60 +197,71 @@ const getChamCongNhanVienTheoThang = async (year, month) => {
       },
     },
     {
-      $facet: {
-        hours: [
-          {
-            $group: {
-              _id: '$nhan_vien_id',
-              tongSoGioLamViecChinhThuc: { $sum: '$so_gio_lam_viec' },
-              tongSoGioLamThem: { $sum: '$so_gio_lam_them' },
-            },
-          },
-        ],
-        attendanceStatus: [
-          {
-            $group: {
-              _id: { nhan_vien_id: '$nhan_vien_id', trang_thai: '$trang_thai' },
-              count: { $sum: 1 },
-            },
-          },
-          {
-            $group: {
-              _id: '$_id.nhan_vien_id',
-              counts: {
-                $push: {
-                  k: '$_id.trang_thai',
-                  v: '$count',
-                },
-              },
-            },
-          },
-          {
-            $addFields: {
-              counts: {
-                $arrayToObject: {
-                  $concatArrays: [
-                    [
-                      { k: 'co_mat', v: 0 },
-                      { k: 'nghi_co_phep', v: 0 },
-                      { k: 'nghi_khong_phep', v: 0 },
-                    ],
-                    '$counts',
-                  ],
-                },
-              },
-            },
-          },
-        ],
+      $group: {
+        _id: "$nhan_vien_id",
+        tongSoGioLamViecChinhThuc: { $sum: "$so_gio_lam_viec" },
+        tongSoGioLamThem: { $sum: "$so_gio_lam_them" },
       },
     },
   ]);
 
-  const { hours = [], attendanceStatus = [] } = chamCongData[0] || {};
+  // Aggregation cho trạng thái điểm danh
+  const attendanceStatus = await ChamCongModel.aggregate([
+    {
+      $match: {
+        ngay_cham_cong: {
+          $gte: new Date(year, month - 1, 1),
+          $lt: new Date(year, month, 1),
+        },
+        nhan_vien_id: { $in: nhanVienIds },
+      },
+    },
+    {
+      $group: {
+        _id: { nhan_vien_id: "$nhan_vien_id", trang_thai: "$trang_thai" },
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $group: {
+        _id: "$_id.nhan_vien_id",
+        counts: {
+          $push: {
+            k: "$_id.trang_thai",
+            v: "$count",
+          },
+        },
+      },
+    },
+    {
+      $addFields: {
+        counts: {
+          $arrayToObject: {
+            $concatArrays: [
+              [
+                { k: "co_mat", v: 0 },
+                { k: "nghi_co_phep", v: 0 },
+                { k: "nghi_khong_phep", v: 0 },
+              ],
+              {
+                $map: {
+                  input: "$counts",
+                  as: "item",
+                  in: {
+                    k: { $ifNull: ["$$item.k", "unknown"] },
+                    v: { $ifNull: ["$$item.v", 0] },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    },
+  ]);
 
-  const hoursMap = Object.fromEntries(
-    hours.map((h) => [h._id.toString(), h])
-  );
+  // Chuyển kết quả thành Map để dễ truy cập
+  const hoursMap = Object.fromEntries(hours.map((h) => [h._id.toString(), h]));
   const attendanceStatusMap = Object.fromEntries(
     attendanceStatus.map((a) => [a._id.toString(), a.counts])
   );
@@ -260,9 +269,13 @@ const getChamCongNhanVienTheoThang = async (year, month) => {
     nhanVienList.map((nv) => [nv._id.toString(), nv.ten_nhan_su])
   );
 
+  // Kết hợp dữ liệu lại
   const result = nhanVienChucVuList.map((nhanVien) => {
-    const tenNhanVien = nhanVienMap[nhanVien.nhan_vien_id] || '';
-    const hours = hoursMap[nhanVien.nhan_vien_id] || { tongSoGioLamViecChinhThuc: 0, tongSoGioLamThem: 0 };
+    const tenNhanVien = nhanVienMap[nhanVien.nhan_vien_id] || "";
+    const hours = hoursMap[nhanVien.nhan_vien_id] || {
+      tongSoGioLamViecChinhThuc: 0,
+      tongSoGioLamThem: 0,
+    };
     const attendance = attendanceStatusMap[nhanVien.nhan_vien_id] || {
       co_mat: 0,
       nghi_co_phep: 0,
@@ -284,23 +297,22 @@ const getChamCongNhanVienTheoThang = async (year, month) => {
   return result;
 };
 
-
-const getChamCongNhanVienChiTietTheoThang = async(year, month, id) => {
-    return await ChamCongModel.find({
-        ngay_cham_cong: {
-            $gte: new Date(year, month - 1, 1), 
-            $lt:  new Date(year, month, 1)     
-        },
-        nhan_vien_id: id
-    }).sort({ ngay_cham_cong: 1 });
-}
+const getChamCongNhanVienChiTietTheoThang = async (year, month, id) => {
+  return await ChamCongModel.find({
+    ngay_cham_cong: {
+      $gte: new Date(year, month - 1, 1),
+      $lt: new Date(year, month, 1),
+    },
+    nhan_vien_id: id,
+  }).sort({ ngay_cham_cong: 1 });
+};
 
 module.exports = {
-    createChamCongs,
-    updateManyChamCong,
-    getChamCongMoiNgay,
-    getChamCongNhanVienTheoThang,
-    getChamCongNhanVienChiTietTheoThang,
-    getTrangThaiCuaNhanVienMoiThang,
-    getTongGioLamViecCuaNhanVienMoiThang
+  createChamCongs,
+  updateManyChamCong,
+  getChamCongMoiNgay,
+  getChamCongNhanVienTheoThang,
+  getChamCongNhanVienChiTietTheoThang,
+  getTrangThaiCuaNhanVienMoiThang,
+  getTongGioLamViecCuaNhanVienMoiThang,
 };

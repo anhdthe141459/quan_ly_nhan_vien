@@ -5,23 +5,12 @@ const PhongBanModel = require("../models/phongBan.model");
 const BangLuongModel = require("../models/bangLuong.model");
 const { getAllNhanVienNotPhongBan } = require("./phongBan.service");
 
-const getNhanViens = async (skip, limit, page) => {
+const getNhanViens = async () => {
   try {
-    const total = await ChucVuCoQuanModel.countDocuments({
-      da_nghi_viec: false,
-    });
     let nhanVienChucVus = await ChucVuCoQuanModel.find({
       da_nghi_viec: false,
-    })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+    }).sort({ createdAt: -1 });
 
-    if (total < 10) {
-      nhanVienChucVus = await ChucVuCoQuanModel.find({
-        da_nghi_viec: false,
-      });
-    }
     // Truy vấn các ChucVuCoQuanModel
 
     // Lấy danh sách các nhan_vien_id từ ChucVuCoQuanModel
@@ -36,7 +25,6 @@ const getNhanViens = async (skip, limit, page) => {
     const phongBans = await PhongBanModel.find({
       _id: { $in: phongBanIds },
     });
-
     const nhanVienCCCDs = await NhanVienCCCDModel.find({
       nhan_vien_id: { $in: nhanVienIds },
     });
@@ -46,9 +34,11 @@ const getNhanViens = async (skip, limit, page) => {
       const nhanVienDetail = nhanViens.find(
         (nv) => nv._id.toString() === nhanVien.nhan_vien_id.toString()
       );
-      const phongBanDetail = phongBans.find(
-        (p) => p._id.toString() === nhanVien.ma_phong_ban.toString()
-      );
+
+      const phongBanDetail = phongBans.find((p) => {
+        return p._id.toString() === nhanVien.ma_phong_ban.toString(); // Ensure this returns a boolean
+      });
+      // console.log("nhanVienchubu=====", phongBanDetail);
       const nhanVienCCCDDetail = nhanVienCCCDs.find(
         (nv) => nv.nhan_vien_id.toString() === nhanVien.nhan_vien_id.toString()
       );
@@ -81,12 +71,7 @@ const getNhanViens = async (skip, limit, page) => {
     // Tính tổng số tài liệu
 
     // Trả về kết quả
-    return {
-      data,
-      total,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page,
-    };
+    return data;
   } catch (error) {
     console.error("Lỗi khi lấy dữ liệu ChucVuCoQuan:", error.message);
     throw error;

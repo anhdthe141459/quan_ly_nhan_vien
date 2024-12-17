@@ -128,7 +128,7 @@ module.exports = {
         };
 
         // Kết nối tới MongoDB với Mongoose và CSFLE
-        await mongoose.connect("mongodb://localhost:27017/quan_ly_nhan_vien", {
+        await mongoose.connect(process.env.DATABASE_URL, {
           autoEncryption: autoEncryptionOptions,
         });
 

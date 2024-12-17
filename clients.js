@@ -20,22 +20,6 @@ async function main() {
   let schemeMap = csfleHelper.createCsfleSchemaMaps(dataKey);
   let csfleClient = await csfleHelper.getCsfleEnabledConnection(schemeMap);
 
-  let exampleDocument = {
-    name: "Jon Doe",
-    ssn: 241014209,
-    bloodType: "AB+",
-    medicalRecords: [
-      {
-        weight: 180,
-        bloodPressure: "120/80",
-      },
-    ],
-    insurance: {
-      provider: "MaestCare",
-      policyNumber: 123142,
-    },
-  };
-
   const regularClientPatientsColl = regularClient
     .db("medicalRecords")
     .collection("patients");
